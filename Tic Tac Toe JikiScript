@@ -1,0 +1,380 @@
+function game_board with color do
+  stroke_color_hex(color)
+  rectangle(5,5,90,90)
+  line(5,35,95,35)
+  line(5,65,95,65)
+  line(35,5,35,95)
+  line(65,5,65,95)
+end
+function draw do 
+  fill_color_rgba(96, 79, 205, 0.85)
+  rectangle(0,0,100,100)
+  write("The game was a draw!")
+end
+function o_wins do
+  fill_color_rgba(96, 79, 205, 0.85)
+  rectangle(0,0,100,100)
+  write("The o's won!")
+end
+function x_wins do
+  fill_color_rgba(96, 79, 205, 0.85)
+  rectangle(0,0,100,100)
+  write("The x's won!")
+end
+function invalid do
+  fill_color_rgba(200, 0, 0, 0.85)
+  rectangle(0,0,100,100)
+  write("Invalid move!")
+end
+function draw_o with move, width, color  do
+  set o_params to [
+      [1,20,20],
+      [2,20,50],
+      [3,20,80],
+      [4,50,20],
+      [5,50,50],
+      [6,50,80],
+      [7,80,20],
+      [8,80,50],
+      [9,80,80]
+    ]
+    stroke_width(width)
+    stroke_color_hex(color)
+    for each param in o_params do
+      if move == param[1] do
+        circle(param[2], param[3], 10)
+      end
+    end
+end
+function draw_x with move, width, color do
+set x_params to [
+    [1, 10,10],
+    [2, 10,40],
+    [3, 10,70],
+    [4, 40,10],
+    [5, 40,40],
+    [6, 40,70],
+    [7, 70,10],
+    [8, 70,40],
+    [9, 70,70]
+  ]
+  stroke_width(width)
+  stroke_color_hex(color)
+  for each param in x_params do
+    if move == param[1] do
+    line(param[2],param[3],param[2]+20,param[3]+20)
+    line(param[2], param[3]+20, param[2]+20, param[3])
+    end
+  end
+end
+function convert_moves with moves do
+  set string to ""
+  set general_list to []
+  set move_list to [
+    "1,1", 
+    "2,1", 
+    "3,1", 
+    "1,2", 
+    "2,2", 
+    "3,2", 
+    "1,3",
+    "2,3", 
+    "3,3"
+  ]
+    for each item in moves do
+      for each num in item indexed by index do 
+        if num == "?" do
+            change string to concatenate(string, num)
+        else if index % 2 != 0 do
+          change string to concatenate(string, my#number_to_string(num), ",")
+        else if index % 2 == 0 do
+          change string to concatenate(string, my#number_to_string(num))        
+        end
+      end
+        change general_list to push(general_list, string)
+        change string to ""
+    end
+  return general_list
+end
+function player_turn with turn do 
+  if turn % 2 != 0 do
+    return "O" 
+  end
+  return "X"
+end
+function number_convert with moves do
+  set list to [
+    ["1,1", 1], 
+    ["2,1", 2], 
+    ["3,1", 3], 
+    ["1,2", 4], 
+    ["2,2", 5],
+    ["3,2", 6],
+    ["1,3", 7],
+    ["2,3", 8],
+    ["3,3", 9]
+  ]
+  set result to []
+  set count to 0
+    for each move in moves indexed by idx do
+      change count to count + 1
+      for each item in list do
+        if move == "?" do 
+          change result to push(result, move)
+          break
+        else if move == item[1] do
+          change result to push(result, item [2])
+          break
+        end
+      end
+      if idx >= 9 do
+        break
+      end
+    end
+  return result        
+end
+function blockWin with player, opponent do
+    set win_conditions to [
+      [1,2,3], //coloum
+      [4,5,6], //coloum
+      [7,8,9], //coloum
+      [1,4,7], //row
+      [2,5,8], //row
+      [3,6,9], //row
+      [1,5,9], //diagonal
+      [3,5,7]  //diagonal
+    ]
+    set match to 0
+    set block_move to []
+    set opm to []
+        for each win_combo in win_conditions do
+            for each win in win_combo do
+                if my#contains(opponent, win) == true do
+                    change opm to push(opm, win)
+                else if my#contains(opponent, win) == false and my#contains(player, win) == false do
+                    change block_move to push(block_move, win)
+                end
+            end
+            if my#length(opm) == 2 and my#length(block_move) == 1 do
+                return block_move[1]
+            else do
+                change block_move to []
+                change opm to []
+            end               
+        end
+  return 0
+end
+function calculateBestMove with player, opponent, played_moves do
+    set decided to false 
+    set match to 0
+    set win_conditions to [
+      [1,2,3], //coloum
+      [4,5,6], //coloum
+      [7,8,9], //coloum
+      [1,4,7], //row
+      [2,5,8], //row
+      [3,6,9], //row
+      [1,5,9], //diagonal
+      [3,5,7]  //diagonal
+    ]
+    if decided == false do 
+        for each win_combo in win_conditions do
+            for each win in win_combo do
+                if my#contains(player, win) == true do
+                    change match to match + 1
+                else if match == 2 and my#contains(player, win) == false and my#contains(opponent, win) == false do 
+                    change decided to true
+                    return win
+                 else do
+                    change match to 0
+                end
+            end
+        end
+        change match to 0
+    end
+    if decided == false do
+        if blockWin(player, opponent) != 0  do
+          return blockWin(player,opponent)
+        end
+    end
+    if decided == false do 
+        for each space in played_moves indexed by idx do
+            if space == "" and my#contains(opponent, idx) == false do
+                change decided to true
+                return idx
+            end
+        end
+    end 
+  return 0
+end
+function win_checker with moves_played do
+    set win_conditions to [
+        [1,2,3], //coloum
+        [4,5,6], //coloum
+        [7,8,9], //coloum
+        [1,4,7], //row
+        [2,5,8], //row
+        [3,6,9], //row
+        [1,5,9], //diagonal
+        [3,5,7]  //diagonal
+    ]
+    set match to 0
+    set winning_match to []
+    for each win_combo in win_conditions do 
+        for each win in win_combo do
+            if my#contains(moves_played, win) do
+                change match to match + 1
+                change winning_match to push(winning_match, win)
+            else do
+                change match to 0
+                change winning_match to []
+            end
+        end
+        if match == 3 do
+          return winning_match
+        end
+        change match to 0
+    end
+    return moves_played
+end
+function isThereAWin with moves_played do
+    set win_conditions to [
+        [1,2,3], //coloum
+        [4,5,6], //coloum
+        [7,8,9], //coloum
+        [1,4,7], //row
+        [2,5,8], //row
+        [3,6,9], //row
+        [1,5,9], //diagonal
+        [3,5,7]  //diagonal
+    ]
+    set match to 0
+    set winning_match to []
+    for each win_combo in win_conditions do 
+        for each win in win_combo do
+            if my#contains(moves_played, win) do
+                change match to match + 1
+            else do 
+              change match to 0
+            end
+        end
+        if match == 3 do
+          return true
+        end
+      change match to 0
+    end
+    return false
+end
+function recolorAll with played_pieces do
+    set width to 1
+    set color to "light gray"
+    for each piece in played_pieces indexed by idx do 
+        if piece == "O" do
+            draw_o(idx, width, color )
+        else if piece == "X" do 
+            draw_x(idx, width, color)
+        end
+    end
+end
+function its_a_draw with cells do
+  recolorAll(cells)
+  draw()
+end 
+
+function run_game with moves do
+    game_board("black")
+    set cells to ["","","","","","","","",""]
+    set x_moves to []
+    set o_moves to []
+    set decided to false
+    set move_list to number_convert(convert_moves(moves))
+    set color to "black"
+    set width to 1
+    set o_match to win_checker(o_moves)
+    set x_match to win_checker(x_moves)
+    set count to 0
+    for each move in move_list indexed by turn do
+      change count to count + 1
+        if player_turn(turn) == "O" do
+            if move == "?" do
+                change move to calculateBestMove(o_moves,x_moves,cells)
+                if move == 0 do 
+                  continue
+                end
+                draw_o(move, width, color)
+                change cells[move]to "O"
+                change o_moves to push(o_moves, move)
+                if isThereAWin(o_moves) == true do
+                    change decided to true
+                    change o_match to win_checker(o_moves)
+                    recolorAll(cells)
+                    draw_o(o_match[1], 2, "green")
+                    draw_o(o_match[2], 2, "green")
+                    draw_o(o_match[3], 2, "green")
+                    o_wins()
+                    break
+                end
+            else if my#contains(x_moves,move) == false and my#contains(o_moves,move) == false do
+                change o_moves to push(o_moves, move)
+                change cells[move] to "O"
+                draw_o(move, width, color)
+                if isThereAWin(o_moves) == true do
+                    change decided to true
+                    change o_match to win_checker(o_moves)
+                    recolorAll(cells)                                
+                    draw_o(o_match[1], 2, "green")
+                    draw_o(o_match[2], 2, "green")
+                    draw_o(o_match[3], 2, "green")
+                    o_wins()
+                    break
+                end
+            else if my#contains(x_moves, move) == true or my#contains(o_moves, move) == true and move != "?" do     
+                change decided to true
+                recolorAll(cells)
+                invalid()
+                break
+            end
+        else if player_turn(turn) == "X" do
+            if move == "?" do
+                change move to calculateBestMove(x_moves, o_moves, cells)
+                if move == 0 do
+                  continue
+                end
+                draw_x(move, width, color)
+                change cells[move] to "X"
+                change x_moves to push(x_moves, move)
+                if isThereAWin(x_moves) == true do
+                    change decided to true
+                    change x_match to win_checker(x_moves)
+                    recolorAll(cells)                           
+                    draw_x(x_match[1], 2, "green")
+                    draw_x(x_match[2], 2, "green")
+                    draw_x(x_match[3], 2, "green")
+                    x_wins()
+                    break
+                end       
+            else if my#contains(x_moves,move) == false and my#contains(o_moves,move) == false do
+                change x_moves to push(x_moves, move)
+                change cells[move] to "X"
+                draw_x(move, width, color)
+                if isThereAWin(x_moves) == true do                    
+                    change decided to true
+                    change x_match to win_checker(x_moves)
+                    recolorAll(cells)
+                    draw_x(x_match[1], 2, "green")
+                    draw_x(x_match[2], 2, "green")
+                    draw_x(x_match[3], 2, "green")
+                    x_wins()
+                    break
+                end                            
+            else if my#contains(x_moves, move) == true or my#contains(o_moves, move) == true and move != "?" do      
+                change decided to true
+                recolorAll(cells)
+                invalid()
+            end
+        end
+    end
+  if count == my#length(move_list) and my#contains(cells, "") == false do
+      its_a_draw(cells)
+  end
+end
