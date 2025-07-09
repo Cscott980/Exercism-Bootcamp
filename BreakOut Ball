@@ -1,0 +1,39 @@
+set ball to new Ball()
+function ballMovement with ball, laps do
+  set right to 3
+  set left to 97
+  set bottom to 97
+  set top to 3
+  set count to 1
+    if ball.cx <= right do
+        change ball.x_velocity to 1
+        change ball.y_velocity to -1
+        move_ball(ball)
+    else if ball.cy >= bottom do
+        if laps == 3 do 
+          break
+        else do
+          change ball.x_velocity to -1
+          change ball.y_velocity to -1
+          move_ball(ball)
+        end
+    else if ball.cx >= left  do 
+        change ball.x_velocity to -1
+        change ball.y_velocity to 1
+        move_ball(ball)
+        change count to count + 1 
+    else if ball.cy <= top do
+        change ball.x_velocity to 1
+        change ball.y_velocity to 1
+        move_ball(ball)
+    else do
+        move_ball(ball)
+    end
+end
+set lap to 0
+repeat 400 times do
+    if ball.cy == 97 do
+      change lap to lap + 1
+    end
+    ballMovement(ball,lap)
+end
