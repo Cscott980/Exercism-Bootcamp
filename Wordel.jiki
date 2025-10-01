@@ -1,0 +1,30 @@
+function process_game with secret_target, guess_list do
+  set wordlegame to new WordleGame()
+  set remaining to {}
+  set states to []
+  wordlegame.draw_board()
+
+  for each word in guess_list indexed by row_index do
+    change remaining to my#char_counter(secret_target)
+    for each letter in word do
+      change states to push(states, "absent")
+    end
+    for each letter in word indexed by i do
+      if secret_target[i] == letter do
+        change states[i] to "correct"
+        if my#has_key(remaining, letter) do
+          change remaining[letter] to remaining[letter] - 1
+        end
+      end
+    end
+    for each letter in word indexed by i do
+      if states[i] != "correct" do
+        if my#has_key(remaining, letter) and remaining[letter] > 0 do
+          change states[i] to "present"
+          change remaining[letter] to remaining[letter] - 1
+        end
+      end
+    end
+    wordlegame.add_word(row_index, word, states)
+  end
+end
