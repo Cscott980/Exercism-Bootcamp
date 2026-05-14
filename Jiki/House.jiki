@@ -1,0 +1,33 @@
+set drawing to [
+    new Roof(50, 30, 68, 20, 3), 
+    new Frame(20,50, 60, 40, 3), 
+    new Door(43, 72, 14, 18, 3), 
+    new Sky(0), 
+    new Ground(20, 2)
+    ]
+set windows to [
+    new Window(30, 55, 12, 13, 3), 
+    new Window(58, 55, 12, 13, 3)
+    ]
+set sun to new Sun(80, 20, 10, 1)
+
+repeat 70 times do
+    change sun.cx to sun.cx - 1.2
+    change sun.cy to sun.cy + 1
+end
+
+change windows[1].lights to true
+change windows[2].lights to true
+set brightness to 100
+
+repeat 100 times do 
+    if drawing[4].hue != 310 do
+        change drawing[4].hue to drawing[4].hue + 2 
+    end
+    for each item in drawing do
+        if brightness != 20 do
+            change item.brightness to brightness
+            change brightness to brightness - 1
+        end 
+    end     
+end

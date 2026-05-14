@@ -16,10 +16,10 @@
 
 <style>
     h1 {
-    font-size: 23px;
-    font-weight: bold;
-    margin-bottom: 5%;
-    color: #2b1a0b;
+        font-size: 23px;
+        font-weight: bold;
+        margin-bottom: 5%;
+        color: #2b1a0b;
     }
     p, ul {
         font-size: 17px;
